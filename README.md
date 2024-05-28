@@ -7,7 +7,7 @@ I don't know where or when the project will end. I am also learning Go for the f
 
 Goals:
 
-Figure out how to emulate the 2 generals problem without actual networking - maybe emulate the network boundary??
-Figure out how to fail often enough that I can easily test and play with things.
-Figure out how to property based chaos engineering test this system
-write tests :)
+- Figure out how to emulate the 2 generals problem without actual networking - maybe emulate the network boundary??
+- Figure out how to fail often enough that I can easily test and play with things.
+- Figure out how to property based chaos engineering test this system
+- write tests :)
