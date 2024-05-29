@@ -1,27 +1,31 @@
 package subscribing
 
 import (
-	"fmt"
 	"math/rand/v2"
+
+	"github.com/cohen990/exactlyOnce/logging"
 )
 
+var logger = logging.Local("subscriber")
+
 type Subscriber struct {
-	ServiceName        string
 	ReceivedCount      int
 	ReceiveFailedCount int
 	PanickedCount      int
 }
 
-func (subscriber *Subscriber) Receive(message string) Status {
+func (subscriber *Subscriber) Receive(message string, status chan Status) {
+	log := logger.Child("Receive")
 	if rand.Float32() > 0.5 {
-		fmt.Printf("%s received message: %q\n", subscriber.ServiceName, message)
+		log.Info("received message: %q", message)
 		subscriber.ReceivedCount++
-		return Received
-	} else if rand.Float32() > 0.5 {
-		subscriber.PanickedCount++
-		panic("explode")
+		status <- Received
+		// } else if rand.Float32() > 0.5 {
+		// 	subscriber.PanickedCount++
+		// 	panic("explode")
 	} else {
+		log.Info("Failed to process message: %q", message)
 		subscriber.ReceiveFailedCount++
-		return Failed
+		status <- Failed
 	}
 }

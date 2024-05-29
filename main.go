@@ -10,8 +10,9 @@ import (
 
 func main() {
 	broker := brokering.Broker{}
-	subscriber := subscribing.Subscriber{ServiceName: "messageSubscriberService"}
+	subscriber := subscribing.Subscriber{}
 	publisher := publishing.Publisher{}
+	broker.Initialise()
 	broker.Register(&subscriber)
 	messages := []string{"Hi", "bye", "why"}
 
