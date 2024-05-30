@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"math/rand/v2"
 	"strings"
 	"time"
@@ -58,15 +57,16 @@ func main() {
 
 	broker.Process()
 
-	fmt.Printf("Publishing %d messages, completed.\n", len(messages))
-	fmt.Printf("Publisher failed to enqueue messages %d times.\n", publisher.EnqueueFailedCount)
-	fmt.Printf("Publisher enqueued %d messages.\n", publisher.EnqueuedCount)
-	fmt.Printf("Broker failed to send messages %d times.\n", broker.SendFailedCount)
-	fmt.Printf("Broker sent %d messages.\n", broker.SentCount)
-	fmt.Printf("Subscriber panicked %d times.\n", subscriber.PanickedCount)
-	fmt.Printf("Subscriber failed to receive messages %d times.\n", subscriber.ReceiveFailedCount)
-	fmt.Printf("Subscriber received %d messages.\n", subscriber.ReceivedCount)
+	logger.Info("============================")
+	logger.Info("Publishing %d messages, completed.", messageCount)
+	logger.Info("Publisher failed to enqueue messages %d times.", publisher.EnqueueFailedCount)
+	logger.Info("Publisher enqueued %d messages.", publisher.EnqueuedCount)
+	logger.Info("Broker failed to send messages %d times.", broker.SendFailedCount)
+	logger.Info("Broker sent %d messages.", broker.SentCount)
+	logger.Info("Subscriber panicked %d times.", subscriber.PanickedCount)
+	logger.Info("Subscriber failed to receive messages %d times.", subscriber.ReceiveFailedCount)
+	logger.Info("Subscriber received %d messages.", subscriber.ReceivedCount)
 
-	fmt.Printf("\nQueued %d messages. Sent %d messages in total.\n", len(messages), broker.TotalSentCount)
-	fmt.Printf("\nExactly once delivery achieved?: %t\n", len(messages) == broker.TotalSentCount)
+	logger.Info("Queued %d messages. Sent %d messages in total.", messageCount, broker.TotalSentCount)
+	logger.Info("Exactly once delivery achieved?: %t", messageCount == broker.TotalSentCount)
 }

@@ -14,7 +14,6 @@ var logger = logging.Local("subscriber")
 type Subscriber struct {
 	ReceivedCount      int
 	ReceiveFailedCount int
-	PanickedCount      int
 	Url                string
 }
 
