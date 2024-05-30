@@ -1,12 +1,12 @@
 package publishing
 
-type Status int
+type PublishStatus int
 
 const (
-	Failed Status = iota
+	Failed PublishStatus = iota
 	Published
 )
 
-func (status Status) String() string {
+func (status PublishStatus) String() string {
 	return [...]string{"Failed", "Published"}[status]
 }

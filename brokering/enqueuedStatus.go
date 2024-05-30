@@ -3,7 +3,7 @@ package brokering
 type EnqueuedStatus int
 
 const (
-	QueuingFailed EnqueuedStatus = iota
+	EnqueuingFailed EnqueuedStatus = iota
 	Enqueued
 )
 
