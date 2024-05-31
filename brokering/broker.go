@@ -5,19 +5,17 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
-	"reflect"
 
 	"github.com/cohen990/exactlyOnce/logging"
+	"github.com/cohen990/exactlyOnce/server"
 
 	"github.com/cohen990/exactlyOnce/subscribing"
 
 	"github.com/google/uuid"
 )
 
-var logger = logging.Local("broker")
-
 type Broker struct {
-	subscriber        *subscribing.Subscriber
+	logRoot           logging.LogRoot
 	subscriberUrl     string
 	messageQueue      map[uuid.UUID]string
 	requeuedMessages  map[uuid.UUID]string
@@ -28,6 +26,7 @@ type Broker struct {
 	SendPanickedCount int
 	Url               string
 	port              string
+	server            server.Server
 }
 
 func (broker *Broker) Initialise() {
@@ -36,9 +35,9 @@ func (broker *Broker) Initialise() {
 	http.HandleFunc("/enqueue", broker.EnqueueHttp)
 	broker.port = "8082"
 	broker.Url = "http://localhost:" + broker.port
+	broker.logRoot = logging.NewRoot("subscriber")
 }
 func (broker *Broker) Register(subscriber *subscribing.Subscriber) {
-	broker.subscriber = subscriber
 	broker.subscriberUrl = subscriber.Url
 }
 
@@ -52,7 +51,7 @@ func (broker *Broker) enqueue(message string) EnqueuedStatus {
 }
 
 func (broker *Broker) Send(message string, status chan SendStatus) {
-	logger := logger.Child("Send")
+	logger := broker.logRoot.Child("Send")
 
 	logger.Info("Sending %q", message)
 	response, err := http.Post(broker.subscriberUrl+"/receive", "text/plain", bytes.NewBuffer([]byte(message)))
@@ -72,7 +71,7 @@ func (broker *Broker) Send(message string, status chan SendStatus) {
 }
 
 func (broker *Broker) Process() {
-	logger := logger.Child("Process")
+	logger := broker.logRoot.Child("Process")
 	logger.Info("Brokering %d messages.", len(broker.messageQueue))
 
 	broker.Brokering = true
@@ -103,23 +102,20 @@ func (broker *Broker) Process() {
 }
 
 func (broker *Broker) requeue() {
-	requeuePointer := reflect.ValueOf(&broker.requeuedMessages).Elem()
-	queuePointer := reflect.ValueOf(&broker.messageQueue).Elem()
-	queuePointer.Set(requeuePointer)
+	broker.requeuedMessages, broker.messageQueue = broker.messageQueue, broker.requeuedMessages
 	broker.requeuedMessages = make(map[uuid.UUID]string)
 }
 
-func (broker *Broker) Start() *http.Server {
-	logger := logger.Child("Start")
-	logger.Info("Starting the server on port: %s", broker.port)
-	server := &http.Server{Addr: "localhost:" + broker.port, Handler: nil}
-	go server.ListenAndServe()
-	logger.Info("Server running in background")
-	return server
+func (broker *Broker) Start() {
+	broker.server = server.Start(broker.port)
+}
+
+func (broker *Broker) Shutdown() {
+	broker.server.Shutdown()
 }
 
 func (broker *Broker) EnqueueHttp(response http.ResponseWriter, request *http.Request) {
-	logger := logger.Child("EnqueueHttp")
+	logger := broker.logRoot.Child("EnqueueHttp")
 
 	buffer, err := io.ReadAll(request.Body)
 	if err != nil {

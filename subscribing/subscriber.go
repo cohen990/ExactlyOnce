@@ -7,14 +7,18 @@ import (
 	"net/http"
 
 	"github.com/cohen990/exactlyOnce/logging"
+	"github.com/cohen990/exactlyOnce/server"
 )
 
-var logger = logging.Local("subscriber")
+var logger = logging.NewRoot("subscriber")
 
 type Subscriber struct {
+	logRoot            logging.LogRoot
 	ReceivedCount      int
 	ReceiveFailedCount int
 	Url                string
+	server             server.Server
+	port               string
 }
 
 func (subscriber *Subscriber) process(message string) Status {
@@ -44,12 +48,17 @@ func (subscriber *Subscriber) ReceiveHttp(response http.ResponseWriter, request 
 	}
 }
 
-func (subscriber *Subscriber) Start() {
-	logger := logger.Child("Start")
-	port := "8081"
-	logger.Info("Starting the server on port: %s", port)
-	subscriber.Url = "http://localhost:" + port
+func (subscriber *Subscriber) Initialise() {
 	http.HandleFunc("/receive", subscriber.ReceiveHttp)
-	go http.ListenAndServe("localhost:"+port, nil)
-	logger.Info("Server running in background")
+	subscriber.port = "8082"
+	subscriber.Url = "http://localhost:" + subscriber.port
+	subscriber.logRoot = logging.NewRoot("subscriber")
+}
+
+func (subscriber *Subscriber) Start() {
+	subscriber.server = server.Start(subscriber.port)
+}
+
+func (subscriber *Subscriber) Shutdown() {
+	subscriber.server.Shutdown()
 }

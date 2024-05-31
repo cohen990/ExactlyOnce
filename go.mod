@@ -4,6 +4,7 @@ go 1.22.3
 
 require (
 	github.com/google/uuid v1.6.0
+	github.com/matryer/is v1.4.1
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
 )
 

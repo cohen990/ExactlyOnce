@@ -7,15 +7,18 @@ import (
 	"github.com/cohen990/exactlyOnce/logging"
 )
 
-var logger = logging.Local("publisher")
-
 type Publisher struct {
+	logRoot            logging.LogRoot
 	EnqueuedCount      int
 	EnqueueFailedCount int
 }
 
+func (publisher *Publisher) Initialise() {
+	publisher.logRoot = logging.NewRoot("publisher")
+}
+
 func (publisher *Publisher) Publish(brokerUrl string, message string) PublishStatus {
-	logger := logger.Child("Publish")
+	logger := publisher.logRoot.Child("Publish")
 	logger.Info("Publishing %q", message)
 	response, err := http.Post(brokerUrl+"/enqueue", "text/plain", bytes.NewBuffer([]byte(message)))
 	if err != nil {
