@@ -50,6 +50,8 @@ func (subscriber *Subscriber) ReceiveHttp(response http.ResponseWriter, request 
 
 func (subscriber *Subscriber) Initialise() {
 	http.HandleFunc("/receive", subscriber.ReceiveHttp)
+	// httptest for testing
+	// checkfunc
 	subscriber.port = "8082"
 	subscriber.Url = "http://localhost:" + subscriber.port
 	subscriber.logRoot = logging.NewRoot("subscriber")
