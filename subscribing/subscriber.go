@@ -18,7 +18,6 @@ type Subscriber struct {
 	ReceiveFailedCount int
 	Url                string
 	server             server.Server
-	port               string
 }
 
 func (subscriber *Subscriber) process(message string) Status {
@@ -49,16 +48,14 @@ func (subscriber *Subscriber) ReceiveHttp(response http.ResponseWriter, request 
 }
 
 func (subscriber *Subscriber) Initialise() {
-	http.HandleFunc("/receive", subscriber.ReceiveHttp)
-	// httptest for testing
-	// checkfunc
-	subscriber.port = "8082"
-	subscriber.Url = "http://localhost:" + subscriber.port
+	subscriber.Url = "http://localhost:8081"
+	subscriber.server = server.New(subscriber.Url)
+	subscriber.server.HandleFunc("/receive", subscriber.ReceiveHttp)
 	subscriber.logRoot = logging.NewRoot("subscriber")
 }
 
 func (subscriber *Subscriber) Start() {
-	subscriber.server = server.Start(subscriber.port)
+	subscriber.server.Start()
 }
 
 func (subscriber *Subscriber) Shutdown() {

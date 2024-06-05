@@ -22,7 +22,7 @@ func main() {
 	broker.Initialise()
 	publisher.Initialise()
 	broker.Start()
-	broker.Register(&subscriber)
+	broker.RegisterSubscriber(subscriber.Url)
 
 	outage := brokering.NewBrokerOutage(&broker)
 	chaos := chaos.Chaos[chaos.Action[publishing.PublishStatus], publishing.PublishStatus]{}

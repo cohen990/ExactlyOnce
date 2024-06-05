@@ -9,8 +9,6 @@ import (
 	"github.com/cohen990/exactlyOnce/logging"
 	"github.com/cohen990/exactlyOnce/server"
 
-	"github.com/cohen990/exactlyOnce/subscribing"
-
 	"github.com/google/uuid"
 )
 
@@ -25,20 +23,19 @@ type Broker struct {
 	SendFailedCount   int
 	SendPanickedCount int
 	Url               string
-	port              string
 	server            server.Server
 }
 
 func (broker *Broker) Initialise() {
 	broker.messageQueue = make(map[uuid.UUID]string)
 	broker.requeuedMessages = make(map[uuid.UUID]string)
-	http.HandleFunc("/enqueue", broker.EnqueueHttp)
-	broker.port = "8082"
-	broker.Url = "http://localhost:" + broker.port
-	broker.logRoot = logging.NewRoot("subscriber")
+	broker.Url = "http://localhost:8082"
+	broker.server = server.New(broker.Url)
+	broker.server.HandleFunc("/enqueue", broker.EnqueueHttp)
+	broker.logRoot = logging.NewRoot("subscriber").Mute()
 }
-func (broker *Broker) Register(subscriber *subscribing.Subscriber) {
-	broker.subscriberUrl = subscriber.Url
+func (broker *Broker) RegisterSubscriber(url string) {
+	broker.subscriberUrl = url
 }
 
 func (broker *Broker) enqueue(message string) EnqueuedStatus {
@@ -107,7 +104,7 @@ func (broker *Broker) requeue() {
 }
 
 func (broker *Broker) Start() {
-	broker.server = server.Start(broker.port)
+	broker.server.Start()
 }
 
 func (broker *Broker) Shutdown() {
